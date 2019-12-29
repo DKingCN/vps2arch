@@ -154,7 +154,6 @@ configure_bootloader() {
 	if [ $needs_lvm2 -eq 1 ]; then
 		# Some distro doesn't use lvmetad by default
 		#sed -i.bak 's/use_lvmetad = 1/use_lvmetad = 0/g' /etc/lvm/lvm.conf
-		cp /etc/lvm/lvm.conf  /etc/lvm/lvm.conf.bak
 	fi
 
 	if [ "$bootloader" = "grub" ]; then
@@ -186,13 +185,9 @@ configure_bootloader() {
 	fi
 
 	if [ $needs_lvm2 -eq 1 ]; then
-		mv /etc/lvm/lvm.conf.bak /etc/lvm/lvm.conf
+		pacman -S xfsprogs
 		sed -i.bak 's/use_lvmetad = 0/use_lvmetad = 1/g' /etc/lvm/lvm.conf
 		sed -i '/HOOKS/s/block/& lvm2/' /etc/mkinitcpio.conf
-		cat > /sbin/fsck.xfs <<-EOF
-			#!/usr/bin/bash
-			exit 0
-		EOF
 		mkinitcpio -p linux
 	fi
 }
